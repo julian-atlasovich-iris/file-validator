@@ -29,7 +29,8 @@ def main():
       if btn:
         if not col_name in st.session_state['file_schema']:
           st.session_state['file_schema'][col_name] = []
-        st.session_state['file_schema'][col_name].append(constraint)
+        if constraint not in st.session_state['file_schema'][col_name]:
+          st.session_state['file_schema'][col_name].append(constraint)
       display_constraints()
       show_squema_checkbox = st.checkbox('show schema')
       if show_squema_checkbox:
