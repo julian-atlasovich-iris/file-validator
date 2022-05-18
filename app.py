@@ -106,7 +106,7 @@ def display_constraints():
       if 'max_chars' in constraint_data:
         text += ' ' + str(int(constraint_data['max_chars']))
       my_display_schema.append(text)
-  st.text_area(label='constraints',value='\n'.join(my_display_schema))
+  st.text_area(label='constraints',value='\n'.join(my_display_schema), disabled = True)
 
 def display_schema():
   st.write(st.session_state['file_schema'])
