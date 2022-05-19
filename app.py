@@ -113,7 +113,6 @@ def display_schema():
   st.write(st.session_state['file_schema'])
 
 if __name__ == '__main__':
-  st.write('hello world')
   main()
 
 
