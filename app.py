@@ -1,26 +1,52 @@
 import streamlit as st
 import pandas as pd
 import io
-from pandas_schema.validation import LeadingWhitespaceValidation, TrailingWhitespaceValidation, CanConvertValidation, MatchesPatternValidation, InRangeValidation, InListValidation,CustomElementValidation
+from pandas_schema.validation import LeadingWhitespaceValidation, TrailingWhitespaceValidation, CanConvertValidation, MatchesPatternValidation, InRangeValidation, InListValidation,CustomElementValidation,IsDistinctValidation
 from pandas_schema import Column, Schema
+import matplotlib.pyplot as plt
+import numpy as np
 
 def main():
+  # session variables
   if 'file_schema' not in st.session_state:
       st.session_state['file_schema'] = {}
 
+  #header
   header = st.container()
   with header:
       st.title('''**File Schema validator**''')
       st.markdown("This tool is designed to check if a flat file complies with schema restrictions and give a data summary")
 
+  #file uploader
+  df = None
+  data_file = st.file_uploader("Upload Your CSV", type=["csv"])
+  if data_file is not None:
+    df = pd.read_csv(data_file,sep=",")
+
+  explorer = st.container()
+  with explorer:
+    if df is not None:
+      st.markdown('''#### The dataset has a total of {} rows & {} Columns'''.format(df.shape[0], df.shape[1]))
+      rows = st.select_slider('choose how many rows to see',range(5,len(df)))
+      st.dataframe(df[0:rows])
+      
+      st.write('---')
+      col_name = st.selectbox('Column to describe',df.columns)
+      #show_visuals = st.checkbox('show data visualisations')
+      #if show_visuals:
+      st.write("Count of unique values: {}, count of non-empty values: {}".format(df[col_name].nunique(),df[col_name].count()))
+      if df[col_name].nunique() < 10:
+        st.write(df[col_name].value_counts())
+        st.bar_chart(df[col_name].value_counts())
+      elif df[col_name].dtype == 'int64':
+        st.write(df[col_name].describe())
+        fig, ax = plt.subplots()
+        ax.hist(df[col_name], bins="auto")
+        st.pyplot(fig=plt)
+
   dataset = st.container()
   with dataset:
-    data_file = st.file_uploader("Upload Your CSV", type=["csv"])
-    if data_file is not None:
-      df = pd.read_csv(data_file,sep=",")
-      st.markdown('''#### The dataset has a total of {} rows & {} Columns'''.format(df.shape[0], df.shape[1]))
-      rows = st.select_slider('choose how many rows to see',range(1,len(df)))
-      st.dataframe(df[0:rows])
+    if df is not None:
       st.write('---')
       st.write('## Add constraints')
       col_name = st.selectbox('Column',df.columns)
@@ -35,12 +61,12 @@ def main():
       show_squema_checkbox = st.checkbox('show schema')
       if show_squema_checkbox:
         display_schema()
-    if st.button('Validate'):
-      validate(df)
+      if st.button('Validate'):
+        validate(df)
 
 
 def get_constraint():
-  constraints = ['No Leading Whitespace','No Trailing Whitespace','Is In Range','Is In List','Matches Pattern','Max Length']
+  constraints = ['No Leading Whitespace','No Trailing Whitespace','Is In Range','Is In List','Is Unique','Matches Pattern','Max Length','No empty values']
   constraint = {}
   constraint['name'] = st.selectbox('Constraint',constraints)
   if constraint['name'] == 'Is In Range':
@@ -67,17 +93,25 @@ def validate(df):
   if errors:
     errors_str = []
     for err in errors:
-      errors_str.append('row: {}, column: "{}", value: "{}" {}'.format(err.row+1, err.column, err.value, err.message))
+      value = err.value if str(err.value) != 'nan' else ' '
+      errors_str.append('row: {}, column: "{}", value: "{}" {}'.format(err.row+1, err.column, value, err.message))
     st.text_area(label='errors',value='\n'.join(errors_str))
+    
+    #Clean file of error rows
+    errors_index_rows = [e.row for e in errors]
+    data_clean = df.drop(index=errors_index_rows)
+    csv = data_clean.to_csv().encode('utf-8')
+    st.write('Download file without error rows')
+    st.download_button("Download",csv,"file.csv","text/csv",key='download-csv')
   else:
     st.write('No errors found')
 
-def get_display_name_to_class_name_lookup(constraint_data):
 
   
-  #null_validation = [CustomElementValidation(lambda d: d is not np.nan, 'this field cannot be null')]
 
 
+
+def get_display_name_to_class_name_lookup(constraint_data):
   if constraint_data['name'] == 'No Leading Whitespace':
     return LeadingWhitespaceValidation()
   if constraint_data['name'] == 'No Trailing Whitespace':
@@ -88,9 +122,14 @@ def get_display_name_to_class_name_lookup(constraint_data):
     return InListValidation(constraint_data['options'].split(','))
   if constraint_data['name'] == 'Matches Pattern':
     return MatchesPatternValidation(constraint_data['pattern'])
+  if constraint_data['name'] == 'Is Unique':
+    return IsDistinctValidation()
   if constraint_data['name'] == 'Max Length':
     max_len_validation=CustomElementValidation(lambda x: len(x)<=constraint_data['max_chars'] ,'More than {} characters long'.format(constraint_data['max_chars']))
     return max_len_validation
+  if constraint_data['name'] == 'No empty values':    
+    null_validation = CustomElementValidation(lambda d: d is not np.nan, 'this field cannot be empty')
+    return null_validation
 
 def display_constraints():
   my_display_schema = []
@@ -115,12 +154,3 @@ def display_schema():
 if __name__ == '__main__':
   main()
 
-
-# errors = schema.validate(data)
-# errors_index_rows = [e.row for e in errors]
-# data_clean = data.drop(index=errors_index_rows)
-# Step 5: save the data and the errors
-# We can save the errors and the clean data in two separate csv files:
-
-# pd.DataFrame({'col':errors}).to_csv('errors.csv')
-# data_clean.to_csv('clean_data.csv')
