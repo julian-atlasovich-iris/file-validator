@@ -10,14 +10,14 @@ customer_id,name,last_name,age,sex,customer_type
 2806RZEX,Anjela,Ligertwood,82,Female,type2
 9998FGIY,Kelby,Halladey,76,Male,unknown
 9123OEGY,Miles,Pappi,56,Male,type2
-2137AKXQ,Erma,Blanque,66,,type2
+2137AKXQ,Erma,Blanque,66,Male,type2
 6020PYVJ,Kial,Besant,48,Female,type2
 5028PBTPPP,Cam,Douglas,63,Female,type3
 8815MYKI,Trudey,Stallon,13,Female,type3
 6172ZIAA,Dorotea,Haysey,35,Female,type2
 6957HSIB,Umeko,Beck,69,Female,type3
 1758NZLQ,Harman,Cordelle,51,Male,
-4039FNPP,Shelba,McKnockiter,12,Female,type3
+4039FNPP,,McKnockiter,12,Female,type3
 2716EIXF,Roberto,Gallamore,19,Male,type3
 4218ZTZR,Manny,Peare,150,Male,type3
 9395YFAQ,Rina,Theseira,37,Female,type3
