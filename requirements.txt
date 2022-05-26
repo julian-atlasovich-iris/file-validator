@@ -1,5 +1,5 @@
+protobuf==4.21.0
 streamlit==1.9.0
 pandas<1.4.2
 pandas-schema==0.3.6
 matplotlib==3.5.2
-protobuf==4.21.0
