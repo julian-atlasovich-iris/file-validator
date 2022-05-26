@@ -17,6 +17,7 @@ def main():
       st.title('''**File Schema validator**''')
       st.markdown("This tool is designed to check if a flat file complies with schema restrictions and give a data summary")
 
+
   #file uploader
   df = None
   data_file = st.file_uploader("Upload Your CSV or Excel", type=["csv","xlsx"],accept_multiple_files=False)
@@ -44,14 +45,15 @@ def main():
       #show_visuals = st.checkbox('show data visualisations')
       #if show_visuals:
       st.write("Count of unique values: {}, count of non-empty values: {}".format(df[col_name].nunique(),df[col_name].count()))
-      if df[col_name].nunique() < 10:
-        st.write(df[col_name].value_counts())
-        st.bar_chart(df[col_name].value_counts())
-      elif df[col_name].dtype == 'int64':
+      if df[col_name].dtype == 'int64':
         st.write(df[col_name].describe())
         fig, ax = plt.subplots()
         ax.hist(df[col_name], bins="auto")
         st.pyplot(fig=plt)
+      elif df[col_name].nunique() < 10:
+        st.write(df[col_name].value_counts())
+        st.bar_chart(df[col_name].value_counts())
+      
 
   dataset = st.container()
   with dataset:
