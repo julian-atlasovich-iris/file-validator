@@ -109,7 +109,7 @@ def validate(df):
     #Clean file of error rows
     errors_index_rows = [e.row for e in errors]
     data_clean = df.drop(index=errors_index_rows)
-    csv = data_clean.to_csv().encode('utf-8')
+    csv = data_clean.to_csv(index=False).encode('utf-8')
     st.write('Download file without error rows')
     st.download_button("Download",csv,"file.csv","text/csv",key='download-csv')
   else:
