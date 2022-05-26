@@ -19,24 +19,15 @@ def main():
 
   #file uploader
   df = None
-  data_file = st.file_uploader("Upload Your CSV or Excel", type=["csv","xlsx"],accept_multiple_files=False)
+  data_file = st.file_uploader("Upload Your CSV", type=["csv"])
   if data_file is not None:
-    file_type=data_file.name.split('.')[-1]
-    if file_type == 'csv':
-      df = pd.read_csv(data_file,sep=",") 
-    elif file_type == 'xlsx':
-      tabs = pd.ExcelFile(data_file).sheet_names
-      sheet_name = st.selectbox('Select Sheet',tabs)
-      df = pd.read_excel(data_file,sheet_name=sheet_name) 
-  
+    df = pd.read_csv(data_file,sep=",")
+
   explorer = st.container()
   with explorer:
     if df is not None:
       st.markdown('''#### The dataset has a total of {} rows & {} Columns'''.format(df.shape[0], df.shape[1]))
-      min_rows = 5 if 5 < len(df)+1 else 1
-      #min_rows
-      df.index += 2
-      rows = st.select_slider('choose how many rows to see',range(min_rows,len(df)+1))
+      rows = st.select_slider('choose how many rows to see',range(5,len(df)))
       st.dataframe(df[0:rows])
       
       st.write('---')
